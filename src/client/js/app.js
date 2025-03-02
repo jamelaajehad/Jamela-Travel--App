@@ -1,6 +1,34 @@
 const SERVER_URL = "http://localhost:3000";
 
-// Fetch coordinates through your server
+
+document.addEventListener("DOMContentLoaded", function () {
+  const dateInput = document.getElementById("departure-date");
+  const today = new Date().toISOString().split("T")[0];
+  dateInput.setAttribute("min", today);
+
+  document.getElementById("travel-form").addEventListener("submit", function (event) {
+    if (dateInput.value < today) {
+      event.preventDefault();
+      alert(" Please select a future date for travel.");
+    }
+  });
+});
+
+
+async function validateDate(departureDate) {
+  const response = await fetch(`${SERVER_URL}/api/validate-date`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ departureDate }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Invalid date.");
+  }
+}
+
+
 async function fetchCoordinates(city) {
   try {
     const response = await fetch(`${SERVER_URL}/api/location?destination=${city}`);
@@ -20,7 +48,7 @@ async function fetchCoordinates(city) {
   }
 }
 
-// Fetch weather through your server
+
 async function fetchWeather(latitude, longitude) {
   try {
     const response = await fetch(`${SERVER_URL}/api/weather?lat=${latitude}&lng=${longitude}`);
@@ -37,7 +65,7 @@ async function fetchWeather(latitude, longitude) {
   }
 }
 
-// Fetch image through your server
+
 async function fetchImage(cityName) {
   try {
     const response = await fetch(`${SERVER_URL}/api/image?destination=${cityName}`);
@@ -54,16 +82,17 @@ async function fetchImage(cityName) {
   }
 }
 
-// Handle form submission 
+
 async function handleFormSubmit(event) {
   event.preventDefault();
-  const cityName = document.getElementById('destination').value;
-  const travelDate = document.getElementById('departure-date').value;
+  const cityName = document.getElementById("destination").value;
+  const travelDate = document.getElementById("departure-date").value;
 
-  const resultSection = document.getElementById('results');
+  const resultSection = document.getElementById("results");
   resultSection.innerHTML = "<p>Loading...</p>";
 
   try {
+    await validateDate(travelDate); 
     const { latitude, longitude } = await fetchCoordinates(cityName);
     const weatherData = await fetchWeather(latitude, longitude);
     const cityImage = await fetchImage(cityName);
@@ -79,6 +108,6 @@ async function handleFormSubmit(event) {
   }
 }
 
-if (typeof document !== 'undefined') {
-  document.getElementById('travel-form').addEventListener('submit', handleFormSubmit);
+if (typeof document !== "undefined") {
+  document.getElementById("travel-form").addEventListener("submit", handleFormSubmit);
 }
