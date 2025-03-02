@@ -38,4 +38,3 @@ Build for Production ⚙️
 To build the app for production, use the following command:
 npm run build
 This will create a production-ready build in the dist/ folder.
-=======
